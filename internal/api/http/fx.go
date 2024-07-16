@@ -8,10 +8,15 @@ import (
 )
 
 var Module = fx.Module(
-	"http-server",
+	"http-api",
 
 	// Register *fiber.App
-	fx.Provide(server.New),
+	fx.Provide(
+		fx.Annotate(
+			server.New,
+			fx.ParamTags(`group:"middlewares"`),
+		),
+	),
 
 	// Register All Handlers
 	handlers.Module,

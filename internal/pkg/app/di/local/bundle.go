@@ -6,34 +6,34 @@ import (
 	"log/slog"
 
 	"github.com/gofiber/fiber/v3"
-	"github.com/wjojf/go-uber-fx/internal/api/http"
-	fiberFX "github.com/wjojf/go-uber-fx/internal/pkg/app/di/local/fiber"
 	"github.com/wjojf/go-uber-fx/internal/pkg/app/di/local/repository"
 	"github.com/wjojf/go-uber-fx/internal/pkg/config"
 	"github.com/wjojf/go-uber-fx/internal/pkg/logging"
 	"github.com/wjojf/go-uber-fx/internal/storage/postgres"
 	"go.uber.org/fx"
+
+	fiberFX "github.com/wjojf/go-uber-fx/internal/pkg/app/di/local/fiber"
 )
 
 func Bundle(cfg config.Config) fx.Option {
 
 	return fx.Options(
+		// Config
+		fx.Supply(cfg),
 
 		// Repository
 		repository.Module,
 
-		// Usecases / Services
+		// Services
 
 		// Infrastructure
-		fx.Supply(cfg),
-
 		logging.Module,
 
 		postgres.Module,
 
-		fx.Supply(fiberFX.ConfigLocal),
-		http.Module,
+		fiberFX.Module(cfg),
 
+		// Main Activity
 		fx.Invoke(registerHooks),
 	)
 }

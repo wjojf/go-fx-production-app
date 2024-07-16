@@ -7,5 +7,7 @@ import (
 
 var Module = fx.Module(
 	"http-handlers",
-	fx.Provide(users.New),
+	fx.Provide(
+		users.New,
+	),
 )
