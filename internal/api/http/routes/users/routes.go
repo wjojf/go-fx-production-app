@@ -9,4 +9,5 @@ func AddRoutes(app *fiber.App, h handler.Handler) {
 	group := app.Group("/api/v1/users")
 
 	group.Get("/:id", h.GetByID)
+	group.Post("/", h.CreateUser)
 }
