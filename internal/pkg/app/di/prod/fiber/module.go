@@ -10,11 +10,11 @@ func Module(cfg config.Config) fx.Option {
 	return fx.Module(
 		"fiber-prod",
 
-		// Server Config
-		fx.Supply(ConfigProd),
+		// Middleware
+		MiddlewareStack,
 
-		// Server Middleware
-		MiddlewareStack(cfg),
+		// Server Options
+		Options,
 
 		// Server Default Bundle
 		http.Module,

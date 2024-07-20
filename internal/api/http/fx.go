@@ -14,7 +14,7 @@ var Module = fx.Module(
 	fx.Provide(
 		fx.Annotate(
 			server.New,
-			fx.ParamTags(`group:"middlewares"`),
+			fx.ParamTags(`group:"options"`),
 		),
 	),
 

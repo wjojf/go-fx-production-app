@@ -4,13 +4,13 @@ import (
 	"github.com/gofiber/fiber/v3"
 )
 
-func New(middlewares ...fiber.Handler) *fiber.App {
+func New(options ...Option) *fiber.App {
 	// Create a new Fiber instance
 	app := fiber.New()
 
 	// Register middleware
-	for _, mw := range middlewares {
-		app.Use(mw)
+	for _, option := range options {
+		app = option(app)
 	}
 
 	return app

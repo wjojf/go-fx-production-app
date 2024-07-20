@@ -8,7 +8,7 @@ import (
 
 func DummyMiddleware(log *slog.Logger) fiber.Handler {
 	return func(c fiber.Ctx) error {
-		log.Debug("I'm a dummy middleware!")
+		log.Info("I'm a dummy middleware!")
 		return c.Next()
 	}
 }
