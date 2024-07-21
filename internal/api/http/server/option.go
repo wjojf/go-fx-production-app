@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"github.com/gofiber/fiber/v3"
+	"github.com/gofiber/fiber/v3/middleware/requestid"
 	"github.com/gofiber/fiber/v3/middleware/static"
 )
 
@@ -31,6 +32,13 @@ func WithStatic(path string, root string) Option {
 
 		app.Get(path, static.New(root, cfg))
 
+		return app
+	}
+}
+
+func WithRequestID() Option {
+	return func(app *fiber.App) *fiber.App {
+		app.Use(requestid.New())
 		return app
 	}
 }

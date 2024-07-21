@@ -20,6 +20,12 @@ var Options = fx.Provide(
 		withStatic,
 		fx.ResultTags(`group:"options"`),
 	),
+
+	// Request ID
+	fx.Annotate(
+		server.WithRequestID,
+		fx.ResultTags(`group:"options"`),
+	),
 )
 
 func withStatic() server.Option {
