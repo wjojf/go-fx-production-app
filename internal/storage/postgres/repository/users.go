@@ -29,6 +29,9 @@ func (r UserRepository) GetUserByID(id string) (models.User, error) {
 	var username string
 
 	err = conn.QueryRow(context.Background(), query, id).Scan(&username)
+	if err != nil {
+		return models.User{}, err
+	}
 
 	return models.NewUser(id, username)
 }
