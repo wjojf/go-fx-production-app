@@ -1,5 +1,5 @@
 # Define variables
-ENV_FILE = ../.env
+ENV_FILE = ./.env
 
 # Export .env to environment
 init:

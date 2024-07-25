@@ -10,7 +10,6 @@ RUN go mod download
 RUN go mod verify
 RUN go build -o ./.bin/app ./cmd/go-uber-fx/main.go
 
-RUN ["make", "init"]
 RUN ["make", "up"]
 
 EXPOSE 8080
