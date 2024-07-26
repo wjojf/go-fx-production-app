@@ -68,3 +68,40 @@ func (r UserRepository) SaveUser(user models.UserValueObject) (models.User, erro
 
 	return models.NewUser(id, name)
 }
+
+func (r UserRepository) GetAllUsers() ([]models.User, error) {
+	var err error
+	var users []models.User
+	var ctx context.Context = context.Background()
+
+	conn, err := r.pool.Acquire(ctx)
+	if err != nil {
+		return users, err
+	}
+
+	defer conn.Release()
+
+	var query string = "SELECT id, username FROM users"
+	rows, err := conn.Query(ctx, query)
+	if err != nil {
+		return users, err
+	}
+
+	defer rows.Close()
+
+	for rows.Next() {
+		var id, username string
+		if err = rows.Scan(&id, &username); err != nil {
+			return users, err
+		}
+
+		user, err := models.NewUser(id, username)
+		if err != nil {
+			return users, err
+		}
+
+		users = append(users, user)
+	}
+
+	return users, nil
+}
