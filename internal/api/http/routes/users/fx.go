@@ -2,7 +2,7 @@ package users
 
 import "go.uber.org/fx"
 
-var Module = fx.Module(
+var Routes = fx.Module(
 	"users-routes",
 	fx.Invoke(
 		AddRoutes,

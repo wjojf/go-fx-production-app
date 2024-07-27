@@ -7,5 +7,5 @@ import (
 
 var Module = fx.Module(
 	"http-routes",
-	users.Module,
+	users.Routes,
 )
