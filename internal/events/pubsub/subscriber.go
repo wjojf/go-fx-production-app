@@ -2,8 +2,10 @@ package pubsub
 
 import (
 	"context"
+	"errors"
 
 	"cloud.google.com/go/pubsub"
+	"github.com/wjojf/go-uber-fx/internal/events"
 )
 
 type Subscriber struct {
@@ -14,8 +16,18 @@ type Subscriber struct {
 	ctxFunc    ContextFunc
 }
 
-func NewSubscriber(cl *pubsub.Client, opFunc OperationFunc, configFunc SubscriptionConfigurator) *Subscriber {
-	return &Subscriber{
+type AdaptedSubscriber struct {
+	s Subscriber
+}
+
+func NewAdaptedSubscriber(s Subscriber) AdaptedSubscriber {
+	return AdaptedSubscriber{
+		s: s,
+	}
+}
+
+func NewSubscriber(cl *pubsub.Client, opFunc OperationFunc, configFunc SubscriptionConfigurator) Subscriber {
+	return Subscriber{
 		cl:         cl,
 		opFunc:     opFunc,
 		configFunc: configFunc,
@@ -25,21 +37,25 @@ func NewSubscriber(cl *pubsub.Client, opFunc OperationFunc, configFunc Subscript
 func (s Subscriber) Subscribe(topicName string, handler Handler) error {
 	var ctx context.Context = s.ctxFunc()
 
-	sub, err := s.getSub(ctx, topicName)
+	sub, err := s.getSub(ctx, topicName, handler)
 	if err != nil {
 		return err
 	}
 
-	return sub.Receive(ctx, handler.Handle)
+	go sub.Receive(ctx, func(ctx context.Context, message *pubsub.Message) {
+		handler.Handle(ctx, message)
+	})
+
+	return nil
 }
 
-func (s Subscriber) getSub(ctx context.Context, topicName string) (*pubsub.Subscription, error) {
+func (s Subscriber) getSub(ctx context.Context, topicName string, handler Handler) (*pubsub.Subscription, error) {
 	topic, err := GetTopic(s.cl, topicName)
 	if err != nil {
 		return nil, err
 	}
 
-	opId := s.opFunc(topicName)
+	opId := s.opFunc(topicName, handler)
 	cfg := s.configFunc(topic)
 
 	sub := s.cl.Subscription(opId)
@@ -54,4 +70,14 @@ func (s Subscriber) getSub(ctx context.Context, topicName string) (*pubsub.Subsc
 	}
 
 	return sub, nil
+}
+
+func (as AdaptedSubscriber) Subscribe(topicName string, handler events.Handler) error {
+
+	h, ok := handler.(AdaptedHandler)
+	if !ok {
+		return errors.New("handler is not a pubsub.Handler")
+	}
+
+	return as.s.Subscribe(topicName, h.h)
 }

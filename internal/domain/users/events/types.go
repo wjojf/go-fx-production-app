@@ -1,5 +1,6 @@
 package events
 
 type UserCreatedPayload struct {
-	UserID string `json:"user_id"`
+	EventID string `json:"event_id"`
+	UserID  string `json:"user_id"`
 }

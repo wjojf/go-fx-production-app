@@ -25,7 +25,7 @@ func (p Publisher) Publish(topicName string, payload []byte) error {
 	ctx := p.ctxFunc()
 	topic, err := GetTopic(p.cl, topicName)
 	if err != nil {
-		p.log.Error("Failed to get Pub/Sub topic. Error: %s", err.Error())
+		p.log.Error("Failed to get Pub/Sub topic. Error: %s", slog.Any("err", err))
 		return err
 	}
 
@@ -35,10 +35,10 @@ func (p Publisher) Publish(topicName string, payload []byte) error {
 
 	msgID, err := result.Get(ctx)
 	if err != nil {
-		p.log.Error("Failed to publish Pub/Sub message. Error: %s", err.Error())
+		p.log.Error("Failed to publish Pub/Sub message", slog.Any("err", err))
 		return err
 	}
 
-	p.log.Info("Published message with ID: %s", msgID)
+	p.log.Info("Published Pub/Sub message", slog.Any("msgID", msgID))
 	return nil
 }

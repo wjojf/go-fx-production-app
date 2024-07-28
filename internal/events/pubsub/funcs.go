@@ -10,7 +10,7 @@ import (
 
 type SubscriptionConfigurator func(topic *pubsub.Topic) pubsub.SubscriptionConfig
 
-type OperationFunc func(topicName string) string
+type OperationFunc func(topicName string, handler Handler) string
 
 type ContextFunc func() context.Context
 
@@ -21,8 +21,8 @@ func DefaultSubscriptionConfigurator(topic *pubsub.Topic) pubsub.SubscriptionCon
 	}
 }
 
-func DefaultOperationGenerator(topicName string) string {
-	return fmt.Sprintf("%s-operation", topicName)
+func DefaultOperationGenerator(topicName string, handler Handler) string {
+	return fmt.Sprintf("%s-%s", topicName, handler.ID())
 }
 
 func DefaultContextFunc() context.Context {
