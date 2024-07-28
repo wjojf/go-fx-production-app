@@ -10,7 +10,12 @@ type Handler interface {
 	Handle(ctx context.Context, payload any)
 }
 
-// Manager is an interface that defines the methods for managing events
+// Subscriber is an interface that defines the methods for managing events
 type Subscriber interface {
 	Subscribe(topic Topic, handler Handler) error
+}
+
+// Publisher is an interface that defines the methods for publishing events
+type Publisher interface {
+	Publish(topic Topic, payload []byte) error
 }

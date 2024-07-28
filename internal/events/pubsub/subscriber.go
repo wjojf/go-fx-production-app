@@ -6,7 +6,7 @@ import (
 	"cloud.google.com/go/pubsub"
 )
 
-type Manager struct {
+type Subscriber struct {
 	cl *pubsub.Client
 
 	opFunc     OperationFunc
@@ -14,38 +14,44 @@ type Manager struct {
 	ctxFunc    ContextFunc
 }
 
-func NewManager(cl *pubsub.Client, opFunc OperationFunc, configFunc SubscriptionConfigurator) *Manager {
-	return &Manager{
+func NewSubscriber(cl *pubsub.Client, opFunc OperationFunc, configFunc SubscriptionConfigurator) *Subscriber {
+	return &Subscriber{
 		cl:         cl,
 		opFunc:     opFunc,
 		configFunc: configFunc,
 	}
 }
 
-func (m *Manager) Subscribe(topicName string, handler Handler) error {
-	var ctx context.Context = m.ctxFunc()
+func (s Subscriber) Subscribe(topicName string, handler Handler) error {
+	var ctx context.Context = s.ctxFunc()
 
-	topic, err := GetTopic(m.cl, topicName)
+	sub, err := s.getSub(ctx, topicName)
 	if err != nil {
 		return err
-	}
-
-	opId := m.opFunc(topicName)
-	cfg := m.configFunc(topic)
-
-	sub := m.cl.Subscription(opId)
-
-	ok, err := sub.Exists(ctx)
-	if err != nil {
-		return err
-	}
-
-	if !ok {
-		sub, err = m.cl.CreateSubscription(ctx, opId, cfg)
-		if err != nil {
-			return err
-		}
 	}
 
 	return sub.Receive(ctx, handler.Handle)
+}
+
+func (s Subscriber) getSub(ctx context.Context, topicName string) (*pubsub.Subscription, error) {
+	topic, err := GetTopic(s.cl, topicName)
+	if err != nil {
+		return nil, err
+	}
+
+	opId := s.opFunc(topicName)
+	cfg := s.configFunc(topic)
+
+	sub := s.cl.Subscription(opId)
+
+	ok, err := sub.Exists(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	if !ok {
+		return s.cl.CreateSubscription(ctx, opId, cfg)
+	}
+
+	return sub, nil
 }

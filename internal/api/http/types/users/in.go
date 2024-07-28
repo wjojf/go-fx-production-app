@@ -9,5 +9,5 @@ type CreateUserRequest struct {
 }
 
 func (r CreateUserRequest) ToValueObject() (models.UserValueObject, error) {
-	return models.NewUserValueObject(r.Username, r.Email, r.Password)
+	return models.NewUserValueObject(r.Username, r.Email, r.Password, false)
 }
