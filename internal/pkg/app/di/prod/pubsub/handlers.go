@@ -29,7 +29,10 @@ func PubSubHooks(
 
 				// Verify user handler
 				vh := pubsub.NewAdaptedHandler(userVerifyHandler)
-				subscriber.Subscribe(events.TopicUserCreated, vh)
+				err := subscriber.Subscribe(events.TopicUserCreated, vh)
+				if err != nil {
+					log.Error("Failed to subscribe to user verify handler", slog.Any("err", err))
+				}
 
 				return nil
 			},

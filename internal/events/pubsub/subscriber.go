@@ -3,6 +3,7 @@ package pubsub
 import (
 	"context"
 	"errors"
+	"log/slog"
 
 	"cloud.google.com/go/pubsub"
 	"github.com/wjojf/go-uber-fx/internal/events"
@@ -14,6 +15,8 @@ type Subscriber struct {
 	opFunc     OperationFunc
 	configFunc SubscriptionConfigurator
 	ctxFunc    ContextFunc
+
+	log *slog.Logger
 }
 
 type AdaptedSubscriber struct {
@@ -26,26 +29,49 @@ func NewAdaptedSubscriber(s Subscriber) AdaptedSubscriber {
 	}
 }
 
-func NewSubscriber(cl *pubsub.Client, opFunc OperationFunc, configFunc SubscriptionConfigurator, ctxFunc ContextFunc) Subscriber {
+func NewSubscriber(
+	cl *pubsub.Client,
+	opFunc OperationFunc,
+	configFunc SubscriptionConfigurator,
+	ctxFunc ContextFunc,
+	log *slog.Logger,
+) Subscriber {
 	return Subscriber{
 		cl:         cl,
 		opFunc:     opFunc,
 		configFunc: configFunc,
 		ctxFunc:    ctxFunc,
+		log:        log,
 	}
 }
 
 func (s Subscriber) Subscribe(topicName string, handler Handler) error {
-	var ctx context.Context = s.ctxFunc()
 
-	sub, err := s.getSub(ctx, topicName, handler)
-	if err != nil {
-		return err
-	}
+	go func() {
+		s.log.Info("Subscribing to topic", slog.String("topic", topicName))
 
-	go sub.Receive(ctx, func(ctx context.Context, message *pubsub.Message) {
-		handler.Handle(ctx, message)
-	})
+		var ctx context.Context = s.ctxFunc()
+
+		sub, err := s.getSub(ctx, topicName, handler)
+		if err != nil {
+			s.log.Error("Failed to get subscription", slog.Any("err", err))
+			return
+		}
+
+		for {
+			var ctx context.Context = s.ctxFunc()
+
+			s.log.Info("Listening for messages...", slog.String("topic", topicName))
+			err := sub.Receive(ctx, func(ctx context.Context, message *pubsub.Message) {
+				handler.Handle(ctx, message)
+				message.Ack()
+			})
+
+			if err != nil {
+				s.log.Error("Failed to receive message", slog.Any("err", err))
+			}
+		}
+	}()
 
 	return nil
 }

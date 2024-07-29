@@ -17,7 +17,7 @@ type ContextFunc func() context.Context
 func DefaultSubscriptionConfigurator(topic *pubsub.Topic) pubsub.SubscriptionConfig {
 	return pubsub.SubscriptionConfig{
 		Topic:       topic,
-		AckDeadline: 10,
+		AckDeadline: 10 * time.Second,
 	}
 }
 
