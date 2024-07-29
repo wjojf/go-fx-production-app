@@ -11,7 +11,8 @@ func PostgresJobs(lc fx.Lifecycle, p storage.OutboxProducer) {
 	lc.Append(
 		fx.Hook{
 			OnStart: func(ctx context.Context) error {
-				return p.StartProducing()
+				go p.StartProducing()
+				return nil
 			},
 		},
 	)

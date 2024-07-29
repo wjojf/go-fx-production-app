@@ -39,6 +39,11 @@ func (p Publisher) Publish(topicName string, payload []byte) error {
 		return err
 	}
 
-	p.log.Info("Published Pub/Sub message", slog.Any("msgID", msgID))
+	p.log.Info(
+		"Published Pub/Sub message",
+		slog.Any("msgID", msgID),
+		slog.String("topic", topicName),
+		slog.String("payload", string(payload)),
+	)
 	return nil
 }

@@ -2,6 +2,7 @@ package pubsub
 
 import (
 	"context"
+	"log/slog"
 
 	"github.com/wjojf/go-uber-fx/internal/events"
 	"github.com/wjojf/go-uber-fx/internal/events/pubsub"
@@ -18,12 +19,17 @@ func PubSubHooks(
 	// Handlers for the subscriber
 	userVerifyHandler user.VerifyHandler,
 
+	// logger
+	log *slog.Logger,
+
 ) {
 	lc.Append(
 		fx.Hook{
 			OnStart: func(context.Context) error {
 
-				subscriber.Subscribe(events.TopicUserCreated, pubsub.NewAdaptedHandler(userVerifyHandler))
+				// Verify user handler
+				vh := pubsub.NewAdaptedHandler(userVerifyHandler)
+				subscriber.Subscribe(events.TopicUserCreated, vh)
 
 				return nil
 			},

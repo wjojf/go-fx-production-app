@@ -24,7 +24,7 @@ func GetOutboxEventsToProduce(pool *pgxpool.Pool) ([]OutboxEvent, error) {
 
 	defer conn.Release()
 
-	var query string = `SELECT id, event_name, payload FROM outbox WHERE is_sent=false;`
+	var query string = `SELECT id, event_name, payload FROM outbox WHERE is_published=false;`
 	rows, err := conn.Query(context.Background(), query)
 	if err != nil {
 		return nil, err
@@ -52,7 +52,7 @@ func MarkOutboxEventAsProduced(pool *pgxpool.Pool, id int) error {
 
 	defer conn.Release()
 
-	var query string = `UPDATE outbox SET is_sent=true WHERE id=$1;`
+	var query string = `UPDATE outbox SET is_published=true WHERE id=$1;`
 	_, err = conn.Exec(context.Background(), query, id)
 
 	return err

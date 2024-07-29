@@ -26,11 +26,12 @@ func NewAdaptedSubscriber(s Subscriber) AdaptedSubscriber {
 	}
 }
 
-func NewSubscriber(cl *pubsub.Client, opFunc OperationFunc, configFunc SubscriptionConfigurator) Subscriber {
+func NewSubscriber(cl *pubsub.Client, opFunc OperationFunc, configFunc SubscriptionConfigurator, ctxFunc ContextFunc) Subscriber {
 	return Subscriber{
 		cl:         cl,
 		opFunc:     opFunc,
 		configFunc: configFunc,
+		ctxFunc:    ctxFunc,
 	}
 }
 

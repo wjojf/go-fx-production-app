@@ -30,8 +30,11 @@ func (h VerifyHandler) Handle(ctx context.Context, message *pubsub.Message) erro
 	var payload events.UserCreatedPayload
 	if err := json.Unmarshal(message.Data, &payload); err != nil {
 		h.log.Error("failed to unmarshal payload: %v", slog.Any("err", err))
+		message.Nack()
 		return err
 	}
+
+	message.Ack()
 
 	h.log.Info("handling user created event", slog.Any("payload", payload))
 

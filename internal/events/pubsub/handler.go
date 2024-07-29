@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"cloud.google.com/go/pubsub"
+	"github.com/wjojf/go-uber-fx/internal/events"
 )
 
 // Implements events.Handler interface
@@ -16,7 +17,7 @@ type AdaptedHandler struct {
 	h Handler
 }
 
-func NewAdaptedHandler(h Handler) AdaptedHandler {
+func NewAdaptedHandler(h Handler) events.Handler {
 	return AdaptedHandler{
 		h: h,
 	}
