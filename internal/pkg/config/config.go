@@ -13,6 +13,8 @@ type Config struct {
 	DatabaseTimeout int    `env:"DATABASE_TIMEOUT" envDefault:"30"`
 
 	HttpPort int `env:"HTTP_PORT" envDefault:"8080"`
+
+	GoogleProjectID string `env:"GOOGLE_PROJECT_ID,required"`
 }
 
 func GetConfig() *Config {

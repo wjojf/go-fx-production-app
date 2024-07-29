@@ -1,4 +1,4 @@
-package repository
+package postgres
 
 import (
 	users "github.com/wjojf/go-uber-fx/internal/domain/users/repository"
@@ -6,7 +6,7 @@ import (
 	"go.uber.org/fx"
 )
 
-var Module = fx.Module(
+var Repositories = fx.Module(
 	"repository-prod",
 
 	fx.Provide(

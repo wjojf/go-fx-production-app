@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 
+	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/pkg/errors"
 	types "github.com/wjojf/go-uber-fx/internal/domain/users/events"
@@ -76,7 +77,8 @@ func (r UserRepository) SaveUser(user models.UserValueObject) (models.User, erro
 	// Marshal the event payload
 	payload, err := json.Marshal(
 		types.UserCreatedPayload{
-			UserID: id,
+			EventID: uuid.NewString(),
+			UserID:  id,
 		},
 	)
 	if err != nil {

@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"cloud.google.com/go/pubsub"
+	"google.golang.org/api/option"
 )
 
 var (
@@ -15,7 +16,9 @@ func NewClient(opts ClientOpts) (*pubsub.Client, error) {
 		return cl, nil
 	}
 
-	client, err := pubsub.NewClient(opts.Ctx, opts.ProjectID)
+	keyOption := option.WithCredentialsFile(opts.KeyFilepath)
+
+	client, err := pubsub.NewClient(opts.Ctx, opts.ProjectID, keyOption)
 	if err != nil {
 		return nil, err
 	}
@@ -26,6 +29,7 @@ func NewClient(opts ClientOpts) (*pubsub.Client, error) {
 }
 
 type ClientOpts struct {
-	Ctx       context.Context
-	ProjectID string
+	Ctx         context.Context
+	ProjectID   string
+	KeyFilepath string
 }
