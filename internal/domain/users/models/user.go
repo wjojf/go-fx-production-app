@@ -1,5 +1,16 @@
 package models
 
+import "fmt"
+
+var (
+	ValidFields = map[string]interface{}{
+		"username":   nil,
+		"email":      nil,
+		"password":   nil,
+		"isVerified": nil,
+	}
+)
+
 type User struct {
 	id         string
 	username   string
@@ -36,4 +47,31 @@ func NewUserValueObject(Username string, Email string, Password string, isVerifi
 		Password:   Password,
 		IsVerified: isVerified,
 	}, nil
+}
+
+type UserValueObjectPartial struct {
+	UserValueObject
+	Fields []string
+}
+
+func NewUserValueObjectPartial(
+	Username string,
+	Email string,
+	Password string,
+	isVerified bool,
+	fields []string,
+) (UserValueObjectPartial, error) {
+
+	vo, err := NewUserValueObject(Username, Email, Password, isVerified)
+	if err != nil {
+		return UserValueObjectPartial{}, err
+	}
+
+	for _, field := range fields {
+		if _, ok := ValidFields[field]; !ok {
+			return UserValueObjectPartial{}, fmt.Errorf("invalid field %s", field)
+		}
+	}
+
+	return UserValueObjectPartial{UserValueObject: vo, Fields: fields}, nil
 }

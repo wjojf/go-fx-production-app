@@ -12,7 +12,7 @@ func (h Handler) GetByID(c fiber.Ctx) error {
 		return c.Status(400).JSON(fiber.Map{"error": "id is required"})
 	}
 
-	user, err := h.r.GetUserByID(userID)
+	user, err := h.r.GetUserByID(c.Context(), userID)
 	if err != nil {
 		return c.Status(500).JSON(fiber.Map{"error": err.Error()})
 	}

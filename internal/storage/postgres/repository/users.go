@@ -3,6 +3,7 @@ package repository
 import (
 	"context"
 	"encoding/json"
+	"log/slog"
 
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -10,18 +11,23 @@ import (
 	types "github.com/wjojf/go-uber-fx/internal/domain/users/events"
 	"github.com/wjojf/go-uber-fx/internal/domain/users/models"
 	"github.com/wjojf/go-uber-fx/internal/events"
+	"github.com/wjojf/go-uber-fx/internal/storage/postgres/mapper"
 	"github.com/wjojf/go-uber-fx/internal/storage/postgres/outbox"
 )
 
 type UserRepository struct {
 	pool *pgxpool.Pool
+	log  *slog.Logger
 }
 
-func NewUserRepository(pool *pgxpool.Pool) UserRepository {
-	return UserRepository{pool: pool}
+func NewUserRepository(pool *pgxpool.Pool, log *slog.Logger) UserRepository {
+	return UserRepository{
+		pool: pool,
+		log:  log,
+	}
 }
 
-func (r UserRepository) GetUserByID(id string) (models.User, error) {
+func (r UserRepository) GetUserByID(ctx context.Context, id string) (models.User, error) {
 	var err error
 
 	conn, err := r.pool.Acquire(context.Background())
@@ -43,9 +49,8 @@ func (r UserRepository) GetUserByID(id string) (models.User, error) {
 	return models.NewUser(id, username, isVerified)
 }
 
-func (r UserRepository) SaveUser(user models.UserValueObject) (models.User, error) {
+func (r UserRepository) SaveUser(ctx context.Context, user models.UserValueObject) (models.User, error) {
 	var err error
-	var ctx context.Context = context.Background()
 
 	conn, err := r.pool.Acquire(ctx)
 	if err != nil {
@@ -104,10 +109,9 @@ func (r UserRepository) SaveUser(user models.UserValueObject) (models.User, erro
 	return models.NewUser(id, name, isVerified)
 }
 
-func (r UserRepository) GetAllUsers() ([]models.User, error) {
+func (r UserRepository) GetAllUsers(ctx context.Context) ([]models.User, error) {
 	var err error
 	var users []models.User
-	var ctx context.Context = context.Background()
 
 	conn, err := r.pool.Acquire(ctx)
 	if err != nil {
@@ -141,4 +145,55 @@ func (r UserRepository) GetAllUsers() ([]models.User, error) {
 	}
 
 	return users, nil
+}
+
+func (r UserRepository) UpdateUserByID(ctx context.Context, userID string, user models.UserValueObjectPartial) (models.User, error) {
+	conn, err := r.pool.Acquire(ctx)
+	if err != nil {
+		return models.User{}, err
+	}
+
+	defer conn.Release()
+
+	tx, err := conn.Begin(ctx)
+	if err != nil {
+		return models.User{}, err
+	}
+
+	var query string = mapper.GetUpdateUserQuery(userID, user)
+	r.log.Info("update user query", slog.String("query", query))
+
+	_, err = tx.Exec(ctx, query)
+	if err != nil {
+		tx.Rollback(ctx)
+		return models.User{}, err
+	}
+
+	// Marshal the event payload
+	payload, err := json.Marshal(
+		types.UserUpdatedPayload{
+			EventID: uuid.NewString(),
+			UserID:  userID,
+		},
+	)
+	if err != nil {
+		tx.Rollback(ctx)
+		return models.User{}, errors.Wrap(err, "failed to marshal payload")
+	}
+
+	if err := outbox.StoreOutboxEvent(
+		tx, outbox.OutboxEvent{
+			EventName: events.TopicUserUpdated,
+			Payload:   payload,
+		},
+	); err != nil {
+		tx.Rollback(ctx)
+		return models.User{}, errors.Wrap(err, "failed to store outbox event")
+	}
+
+	if err = tx.Commit(ctx); err != nil {
+		return models.User{}, err
+	}
+
+	return r.GetUserByID(ctx, userID)
 }

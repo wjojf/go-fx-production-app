@@ -6,7 +6,7 @@ import (
 )
 
 func (h Handler) GetAll(c fiber.Ctx) error {
-	users, err := h.r.GetAllUsers()
+	users, err := h.r.GetAllUsers(c.Context())
 	if err != nil {
 		return c.Status(500).JSON(fiber.Map{"error": err.Error()})
 	}
