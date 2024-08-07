@@ -1,6 +1,8 @@
 package prod
 
 import (
+	"log/slog"
+
 	fiberFX "github.com/wjojf/go-uber-fx/internal/pkg/app/di/prod/fiber"
 	postgresFX "github.com/wjojf/go-uber-fx/internal/pkg/app/di/prod/postgres"
 	pubsubFX "github.com/wjojf/go-uber-fx/internal/pkg/app/di/prod/pubsub"
@@ -8,6 +10,7 @@ import (
 	"github.com/wjojf/go-uber-fx/internal/pkg/logging"
 	"github.com/wjojf/go-uber-fx/internal/storage/postgres"
 	"go.uber.org/fx"
+	"go.uber.org/fx/fxevent"
 )
 
 func Bundle(cfg config.Config) fx.Option {
@@ -38,6 +41,15 @@ func Bundle(cfg config.Config) fx.Option {
 
 			// Start the outbox producer
 			postgresFX.PostgresJobs,
+		),
+
+		// FX Event Logger
+		fx.WithLogger(
+			func(log *slog.Logger) fxevent.Logger {
+				return &fxevent.SlogLogger{
+					Logger: log,
+				}
+			},
 		),
 	)
 }
