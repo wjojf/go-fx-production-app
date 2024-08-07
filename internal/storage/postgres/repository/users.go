@@ -161,7 +161,6 @@ func (r UserRepository) UpdateUserByID(ctx context.Context, userID string, user 
 	}
 
 	var query string = mapper.GetUpdateUserQuery(userID, user)
-	r.log.Info("update user query", slog.String("query", query))
 
 	_, err = tx.Exec(ctx, query)
 	if err != nil {

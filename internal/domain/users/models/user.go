@@ -18,7 +18,7 @@ type User struct {
 }
 
 func NewUser(id string, username string, isVerified bool) (User, error) {
-	return User{id: id, username: username}, nil
+	return User{id: id, username: username, isVerified: isVerified}, nil
 }
 
 func (u User) ID() string {
