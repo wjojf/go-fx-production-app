@@ -6,11 +6,11 @@ import (
 )
 
 var MiddlewareStack = fx.Provide(
-	// Dummy, remove later
-	fx.Annotate(
-		middleware.DummyMiddleware,
-		fx.ResultTags(`group:"middlewares"`),
-	),
+	// // Dummy, remove later
+	// fx.Annotate(
+	// 	middleware.DummyMiddleware,
+	// 	fx.ResultTags(`group:"middlewares"`),
+	// ),
 
 	// Request Logger
 	fx.Annotate(

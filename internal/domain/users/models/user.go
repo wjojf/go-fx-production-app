@@ -2,12 +2,19 @@ package models
 
 import "fmt"
 
+const (
+	FieldIsVerified = "isVerified"
+	FieldUsername   = "username"
+	FieldEmail      = "email"
+	FieldPassword   = "password"
+)
+
 var (
 	ValidFields = map[string]interface{}{
-		"username":   nil,
-		"email":      nil,
-		"password":   nil,
-		"isVerified": nil,
+		FieldEmail:      nil,
+		FieldUsername:   nil,
+		FieldIsVerified: nil,
+		FieldPassword:   nil,
 	}
 )
 

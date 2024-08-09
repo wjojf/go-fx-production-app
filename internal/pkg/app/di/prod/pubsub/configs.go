@@ -8,6 +8,10 @@ import (
 	"github.com/wjojf/go-uber-fx/internal/pkg/config"
 )
 
+const (
+	googleKeyRelativePath = "/keys/pubsub-prod.json"
+)
+
 func GetClientOpts(cfg config.Config) pubsub.ClientOpts {
 
 	cwd, _ := os.Getwd()
@@ -15,7 +19,7 @@ func GetClientOpts(cfg config.Config) pubsub.ClientOpts {
 	return pubsub.ClientOpts{
 		Ctx:         context.Background(),
 		ProjectID:   cfg.GoogleProjectID,
-		KeyFilepath: cwd + "/keys/pubsub-prod.json",
+		KeyFilepath: cwd + googleKeyRelativePath,
 	}
 }
 
