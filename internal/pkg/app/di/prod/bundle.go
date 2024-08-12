@@ -3,6 +3,7 @@ package prod
 import (
 	"log/slog"
 
+	"github.com/wjojf/go-uber-fx/internal/pkg/app/di/prod/domain"
 	fiberFX "github.com/wjojf/go-uber-fx/internal/pkg/app/di/prod/fiber"
 	postgresFX "github.com/wjojf/go-uber-fx/internal/pkg/app/di/prod/postgres"
 	pubsubFX "github.com/wjojf/go-uber-fx/internal/pkg/app/di/prod/pubsub"
@@ -18,6 +19,9 @@ func Bundle(cfg config.Config) fx.Option {
 	return fx.Options(
 		// Config
 		fx.Supply(cfg),
+
+		// Domain
+		domain.Module,
 
 		// Repository
 		postgresFX.Repositories,
