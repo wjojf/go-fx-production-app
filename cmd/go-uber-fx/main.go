@@ -1,6 +1,8 @@
 package main
 
-import "github.com/wjojf/go-uber-fx/internal/pkg/app"
+import (
+	"github.com/wjojf/go-uber-fx/internal/pkg/app"
+)
 
 func main() {
 	app, err := app.New()
