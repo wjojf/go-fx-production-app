@@ -16,27 +16,19 @@ type User struct {
 	Email string `json:"email"`
 }
 
-func NewUser(user models.User) *User {
+func NewUser(u models.User) *User {
 	return &User{
-		ID:    user.ID(),
-		Name:  user.Username(),
-		Email: "todo",
+		ID:    u.ID(),
+		Name:  u.Username(),
+		Email: "",
 	}
 }
-
 
 type UserCreateInput struct {
 	Name     string `json:"name"`
 	Email    string `json:"email"`
 	Password string `json:"password"`
 }
-
-func (cu UserCreateInput) ToDomain() (models.UserValueObject, error) {
-	return models.NewUserValueObject(
-		cu.Name, cu.Email, cu.Password, false,
-	)
-}
-
 
 type UserUpdateInput struct {
 	ID         string  `json:"id"`

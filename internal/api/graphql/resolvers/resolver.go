@@ -1,4 +1,4 @@
-package users
+package resolvers
 
 import (
 	"log/slog"
@@ -11,13 +11,13 @@ import (
 // It serves as dependency injection for your app, add any dependencies you require here.
 
 type Resolver struct {
-	r   repository.UsersRepository
 	log *slog.Logger
+	r   repository.UsersRepository
 }
 
-func NewResolver(r repository.UsersRepository, log *slog.Logger) *Resolver {
+func New(log *slog.Logger, r repository.UsersRepository) *Resolver {
 	return &Resolver{
-		r:   r,
 		log: log,
+		r:   r,
 	}
 }

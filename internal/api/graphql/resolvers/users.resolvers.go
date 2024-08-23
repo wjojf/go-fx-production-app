@@ -1,4 +1,4 @@
-package users
+package resolvers
 
 // This file will be automatically regenerated based on the schema, any resolver implementations
 // will be copied through when generating and any unknown code will be moved to the end.
@@ -8,23 +8,13 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/wjojf/go-uber-fx/internal/api/graphql"
 	"github.com/wjojf/go-uber-fx/internal/api/graphql/types"
+	"github.com/wjojf/go-uber-fx/internal/domain/users/models"
 )
 
 // CreateUser is the resolver for the createUser field.
 func (r *mutationResolver) CreateUser(ctx context.Context, input types.UserCreateInput) (*types.User, error) {
-	vo, err := input.ToDomain()
-	if err != nil {
-		return nil, err
-	}
-
-	user, err := r.r.SaveUser(ctx, vo)
-	if err != nil {
-		return nil, err
-	}
-
-	return types.NewUser(user), nil
+	panic(fmt.Errorf("not implemented: CreateUser - createUser"))
 }
 
 // UpdateUser is the resolver for the updateUser field.
@@ -39,7 +29,22 @@ func (r *mutationResolver) DeleteUser(ctx context.Context, id string) (*types.Us
 
 // Users is the resolver for the users field.
 func (r *queryResolver) Users(ctx context.Context) ([]*types.User, error) {
-	panic(fmt.Errorf("not implemented: Users - users"))
+
+	var usersResponse []*types.User
+	var users []models.User
+
+	// Get users from the repository
+	users, err := r.r.GetAllUsers(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	// Convert users to response
+	for _, user := range users {
+		usersResponse = append(usersResponse, types.NewUser(user))
+	}
+
+	return usersResponse, nil
 }
 
 // User is the resolver for the user field.
@@ -47,11 +52,11 @@ func (r *queryResolver) User(ctx context.Context, id string) (*types.User, error
 	panic(fmt.Errorf("not implemented: User - user"))
 }
 
-// Mutation returns graphql1.MutationResolver implementation.
-func (r *Resolver) Mutation() graphql.MutationResolver { return &mutationResolver{r} }
+// Mutation returns MutationResolver implementation.
+func (r *Resolver) Mutation() MutationResolver { return &mutationResolver{r} }
 
-// Query returns graphql1.QueryResolver implementation.
-func (r *Resolver) Query() graphql.QueryResolver { return &queryResolver{r} }
+// Query returns QueryResolver implementation.
+func (r *Resolver) Query() QueryResolver { return &queryResolver{r} }
 
 type mutationResolver struct{ *Resolver }
 type queryResolver struct{ *Resolver }

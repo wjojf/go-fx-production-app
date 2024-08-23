@@ -20,6 +20,15 @@ func Bundle(cfg config.Config) fx.Option {
 		// Config
 		fx.Supply(cfg),
 
+		// FX Event Loggers
+		fx.WithLogger(
+			func(log *slog.Logger) fxevent.Logger {
+				return &fxevent.SlogLogger{
+					Logger: log,
+				}
+			},
+		),
+
 		// Domain
 		domain.Module,
 
@@ -29,10 +38,13 @@ func Bundle(cfg config.Config) fx.Option {
 		// Infrastructure
 		logging.Module,
 
+		// Postgres Connection
 		postgres.Module,
 
+		// Fiber API
 		fiberFX.Module(cfg),
 
+		// PubSub
 		pubsubFX.Module,
 
 		// Main Activity
@@ -45,15 +57,6 @@ func Bundle(cfg config.Config) fx.Option {
 
 			// Start the outbox producer
 			postgresFX.PostgresJobs,
-		),
-
-		// FX Event Logger
-		fx.WithLogger(
-			func(log *slog.Logger) fxevent.Logger {
-				return &fxevent.SlogLogger{
-					Logger: log,
-				}
-			},
 		),
 	)
 }
