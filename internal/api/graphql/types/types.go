@@ -30,10 +30,47 @@ type UserCreateInput struct {
 	Password string `json:"password"`
 }
 
+func (c UserCreateInput) ToVO(isVerified bool) (models.UserValueObject, error) {
+	return models.NewUserValueObject(c.Name, c.Email, c.Password, isVerified)
+}
+
 type UserUpdateInput struct {
 	ID         string  `json:"id"`
 	Name       *string `json:"name,omitempty"`
 	Email      *string `json:"email,omitempty"`
 	Password   *string `json:"password,omitempty"`
 	IsVerified *bool   `json:"isVerified,omitempty"`
+}
+
+func (input UserUpdateInput) ToVO() (models.UserValueObjectPartial, error) {
+
+	var fields []string
+
+	var email, username, password string
+	var isVerified bool
+
+
+	if input.Name != nil {
+		username = *input.Name
+		fields = append(fields, models.FieldUsername)
+	}
+
+	if input.Email != nil {
+		email = *input.Email
+		fields = append(fields, models.FieldEmail)
+	}
+
+	if input.Password != nil {
+		password = *input.Password
+		fields = append(fields, models.FieldPassword)
+	}
+
+	if input.IsVerified != nil {
+		isVerified = *input.IsVerified
+		fields = append(fields, models.FieldIsVerified)
+	}
+
+	return models.NewUserValueObjectPartial(
+		username, email, password, isVerified, fields,
+	)
 }

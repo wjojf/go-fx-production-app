@@ -14,17 +14,42 @@ import (
 
 // CreateUser is the resolver for the createUser field.
 func (r *mutationResolver) CreateUser(ctx context.Context, input types.UserCreateInput) (*types.User, error) {
-	panic(fmt.Errorf("not implemented: CreateUser - createUser"))
+
+	// Convert input to value object
+	vo, err := input.ToVO(false)
+	if err != nil {
+		return nil, err
+	}
+
+	// Create user
+	user, err := r.r.SaveUser(ctx, vo)
+	if err != nil {
+		return nil, err
+	}
+
+	return types.NewUser(user), nil
+
 }
 
 // UpdateUser is the resolver for the updateUser field.
 func (r *mutationResolver) UpdateUser(ctx context.Context, input types.UserUpdateInput) (*types.User, error) {
-	panic(fmt.Errorf("not implemented: UpdateUser - updateUser"))
+
+	vo, err := input.ToVO()
+	if err != nil {
+		return nil, err
+	}
+
+	user, err := r.r.UpdateUserByID(ctx, input.ID, vo)
+	if err != nil {
+		return nil, err
+	}
+
+	return types.NewUser(user), nil
 }
 
 // DeleteUser is the resolver for the deleteUser field.
 func (r *mutationResolver) DeleteUser(ctx context.Context, id string) (*types.User, error) {
-	panic(fmt.Errorf("not implemented: DeleteUser - deleteUser"))
+	return nil, nil
 }
 
 // Users is the resolver for the users field.
