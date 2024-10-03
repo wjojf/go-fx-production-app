@@ -9,6 +9,9 @@ import (
 
 func (h Handler) UpdateUserFull(c fiber.Ctx) error {
 
+	span := h.tracer.StartSpan("UpdateUserFull")
+	defer span.Finish()
+
 	var userID string = c.Params("id")
 	if userID == "" {
 		return c.Status(400).JSON(

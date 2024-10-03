@@ -1,6 +1,7 @@
 package prod
 
 import (
+	"github.com/wjojf/go-uber-fx/internal/pkg/tracing"
 	"log/slog"
 
 	"github.com/wjojf/go-uber-fx/internal/pkg/app/di/prod/domain"
@@ -37,6 +38,9 @@ func Bundle(cfg config.Config) fx.Option {
 
 		// Infrastructure
 		logging.Module,
+
+		// Tracing
+		tracing.Module,
 
 		// Postgres Connection
 		postgres.Module,

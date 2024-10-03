@@ -12,7 +12,7 @@ func NewServer(r *gql.Resolver) *http.ServeMux {
 
 	mux := http.NewServeMux()
 
-	handler := handler.NewDefaultServer(
+	httpHandler := handler.NewDefaultServer(
 		gql.NewExecutableSchema(
 			gql.Config{
 				Resolvers: r,
@@ -20,7 +20,7 @@ func NewServer(r *gql.Resolver) *http.ServeMux {
 		),
 	)
 
-	mux.Handle("POST /graphql", handler)
+	mux.Handle("POST /graphql", httpHandler)
 	mux.Handle("GET /graphql", playground.Handler("GraphQL playground", "/graphql"))
 
 	return mux

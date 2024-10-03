@@ -4,6 +4,8 @@ var (
 	cfgInstance *Config
 )
 
+type Initializer func() (*Config, error)
+
 type Config struct {
 	Environment string `env:"ENV,required"`
 
@@ -15,10 +17,6 @@ type Config struct {
 	HttpPort int `env:"HTTP_PORT" envDefault:"8080"`
 
 	GoogleProjectID string `env:"GOOGLE_PROJECT_ID,required"`
-}
 
-func GetConfig() *Config {
-	return cfgInstance
+	JaegerUrl string `env:"JAEGER_URL"`
 }
-
-type Initializer func() (*Config, error)
