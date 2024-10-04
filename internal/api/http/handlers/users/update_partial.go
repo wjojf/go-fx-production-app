@@ -2,16 +2,17 @@ package users
 
 import (
 	"fmt"
+	"github.com/opentracing/opentracing-go"
 
 	"github.com/gofiber/fiber/v3"
 	schemas "github.com/wjojf/go-uber-fx/internal/api/http/types/users"
 )
 
 func (h Handler) UpdateUserPartial(c fiber.Ctx) error {
-	span := h.tracer.StartSpan("UpdateUserFull")
+	span, ctx := opentracing.StartSpanFromContext(c.Context(), "UpdateUserPartial")
 	defer span.Finish()
 
-	var userID string = c.Params("id")
+	var userID = c.Params("id")
 	if userID == "" {
 		return c.Status(400).JSON(
 			fiber.Map{
@@ -38,7 +39,7 @@ func (h Handler) UpdateUserPartial(c fiber.Ctx) error {
 		)
 	}
 
-	user, err := h.r.UpdateUserByID(c.Context(), userID, vo)
+	user, err := h.r.UpdateUserByID(ctx, userID, vo)
 	if err != nil {
 		return c.Status(500).JSON(
 			fiber.Map{
