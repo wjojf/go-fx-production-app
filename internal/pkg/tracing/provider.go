@@ -12,8 +12,8 @@ func New(cfg config.Config) (opentracing.Tracer, io.Closer, error) {
 	c := jaegerCfg.Configuration{
 		ServiceName: "golang-uber-fx-backend",
 		Sampler: &jaegerCfg.SamplerConfig{
-			Type:  jaeger.SamplerTypeRateLimiting,
-			Param: 100, // 100 traces per second
+			Type:  jaeger.SamplerTypeConst,
+			Param: 1, // sample all traces
 		},
 		Reporter: &jaegerCfg.ReporterConfig{
 			LocalAgentHostPort: cfg.JaegerUrl,
@@ -21,5 +21,14 @@ func New(cfg config.Config) (opentracing.Tracer, io.Closer, error) {
 		},
 	}
 
-	return c.NewTracer()
+	tracer, closer, err := c.NewTracer()
+	if err != nil {
+		return nil, nil, err
+	}
+
+	// Set the tracer as the global tracer
+	opentracing.SetGlobalTracer(tracer)
+
+	return tracer, closer, nil
+
 }

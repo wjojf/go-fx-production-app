@@ -1,8 +1,6 @@
 package server
 
 import (
-	"time"
-
 	"github.com/gofiber/fiber/v3"
 	"github.com/gofiber/fiber/v3/middleware/requestid"
 	"github.com/gofiber/fiber/v3/middleware/static"
@@ -24,13 +22,7 @@ func WithMiddleware(middlewares ...fiber.Handler) Option {
 func WithStatic(path string, root string) Option {
 	return func(app *fiber.App) *fiber.App {
 
-		var cfg = static.Config{
-			CacheDuration: 1 * time.Hour,
-			MaxAge:        3600,
-			Browse:        true,
-		}
-
-		app.Get(path, static.New(root, cfg))
+		app.Get(path, static.New(root))
 
 		return app
 	}

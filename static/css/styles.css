@@ -1,0 +1,41 @@
+/* Reset some basic styling */
+body, html {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: #f4f4f4;
+    font-family: Arial, sans-serif;
+}
+
+.container {
+    text-align: center;
+}
+
+.gopher-icon {
+    width: 150px;
+    animation: spin 5s linear infinite;
+}
+
+h1 {
+    font-size: 2em;
+    margin: 20px 0 10px;
+    color: #333;
+}
+
+p {
+    font-size: 1.2em;
+    color: #666;
+}
+
+/* Spinning animation for Gopher */
+@keyframes spin {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(360deg);
+    }
+}

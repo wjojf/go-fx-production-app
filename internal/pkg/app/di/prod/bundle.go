@@ -46,7 +46,7 @@ func Bundle(cfg config.Config) fx.Option {
 		postgres.Module,
 
 		// Fiber API
-		fiberFX.Module(cfg),
+		fiberFX.Module(),
 
 		// PubSub
 		pubsubFX.Module,
