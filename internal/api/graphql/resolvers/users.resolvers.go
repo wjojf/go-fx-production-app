@@ -6,7 +6,7 @@ package resolvers
 
 import (
 	"context"
-	"fmt"
+	"github.com/pkg/errors"
 
 	"github.com/wjojf/go-uber-fx/internal/api/graphql/types"
 	"github.com/wjojf/go-uber-fx/internal/domain/users/models"
@@ -49,7 +49,7 @@ func (r *mutationResolver) UpdateUser(ctx context.Context, input types.UserUpdat
 
 // DeleteUser is the resolver for the deleteUser field.
 func (r *mutationResolver) DeleteUser(ctx context.Context, id string) (*types.User, error) {
-	return nil, nil
+	return nil, errors.Wrap(errors.New("not implemented"), "DeleteUser")
 }
 
 // Users is the resolver for the users field.
@@ -74,7 +74,15 @@ func (r *queryResolver) Users(ctx context.Context) ([]*types.User, error) {
 
 // User is the resolver for the user field.
 func (r *queryResolver) User(ctx context.Context, id string) (*types.User, error) {
-	panic(fmt.Errorf("not implemented: User - user"))
+
+	var user models.User
+	var err error
+
+	if user, err = r.r.GetUserByID(ctx, id); err != nil {
+		return nil, err
+	}
+
+	return types.NewUser(user), nil
 }
 
 // Mutation returns MutationResolver implementation.
