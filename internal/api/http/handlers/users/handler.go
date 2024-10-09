@@ -20,3 +20,7 @@ func New(r repository.UsersRepository, log *slog.Logger, tracer opentracing.Trac
 		tracer: tracer,
 	}
 }
+
+func (h Handler) Repository() repository.UsersRepository {
+	return h.r
+}

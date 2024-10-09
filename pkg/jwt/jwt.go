@@ -3,7 +3,6 @@ package jwt
 import (
 	"fmt"
 	"github.com/dgrijalva/jwt-go"
-	"reflect"
 )
 
 func GenerateToken(method jwt.SigningMethod, payload jwt.Claims, signKey string) (string, error) {
@@ -11,15 +10,17 @@ func GenerateToken(method jwt.SigningMethod, payload jwt.Claims, signKey string)
 	return t.SignedString([]byte(signKey))
 }
 
-// DecodeToken decodes the JWT token and returns the claims of type T.
-func DecodeToken[T jwt.StandardClaims](tokenString string, method jwt.SigningMethod, signKey string) (T, error) {
-	var empty T // Return an empty T in case of an error
-
-	// Create a new instance of T by using reflect (since we cannot directly use new(T) due to interface constraints)
-	claims := reflect.New(reflect.TypeOf(empty)).Interface().(jwt.Claims)
+// / DecodeToken decodes the JWT token and fills the passed claims object of type T with the parsed claims.
+// T must implement the jwt.Claims interface.
+func DecodeToken[T jwt.Claims](tokenString string, method jwt.SigningMethod, signKey string, claims *T) error {
+	// Ensure that the passed claims object satisfies the jwt.Claims interface.
+	claimsInterface, ok := interface{}(claims).(jwt.Claims)
+	if !ok {
+		return fmt.Errorf("invalid claims type: %T does not implement jwt.Claims", claims)
+	}
 
 	// Parse the token with the provided claims type
-	token, err := jwt.ParseWithClaims(tokenString, claims, func(token *jwt.Token) (interface{}, error) {
+	token, err := jwt.ParseWithClaims(tokenString, claimsInterface, func(token *jwt.Token) (interface{}, error) {
 		// Ensure the signing method is as expected
 		if token.Method != method {
 			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
@@ -29,19 +30,14 @@ func DecodeToken[T jwt.StandardClaims](tokenString string, method jwt.SigningMet
 
 	// If there was an error during parsing, return it
 	if err != nil {
-		return empty, err
+		return err
 	}
 
-	// If the token is valid and claims are correct
+	// If the token is invalid, return an error
 	if !token.Valid {
-		return empty, nil
+		return fmt.Errorf("invalid token")
 	}
 
-	// Otherwise, return an error for invalid token
-	claimsTyped, ok := claims.(T)
-	if !ok {
-		return empty, fmt.Errorf("invalid claims type: %T", claims)
-	}
-
-	return claimsTyped, nil
+	// Claims have been populated into passed *claims, no need to return anything else
+	return nil
 }

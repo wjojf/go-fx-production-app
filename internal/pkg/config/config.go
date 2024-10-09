@@ -19,4 +19,6 @@ type Config struct {
 	GoogleProjectID string `env:"GOOGLE_PROJECT_ID,required"`
 
 	JaegerUrl string `env:"JAEGER_URL"`
+
+	JwtSigningKey string `env:"JWT_SIGN_KEY,required"`
 }
