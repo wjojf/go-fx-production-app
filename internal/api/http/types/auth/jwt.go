@@ -18,3 +18,13 @@ func NewPayload(userId string, lifetime time.Duration) JwtPayload {
 		UserId: userId,
 	}
 }
+
+type TokenPair struct {
+	AccessToken  string
+	RefreshToken string
+}
+
+type TokenRefreshed struct {
+	AccessToken string
+	UserID      string
+}

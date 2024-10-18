@@ -5,6 +5,10 @@ import (
 	"github.com/dgrijalva/jwt-go"
 )
 
+var (
+	Hs256 = jwt.SigningMethodHS256
+)
+
 func GenerateToken(method jwt.SigningMethod, payload jwt.Claims, signKey string) (string, error) {
 	t := jwt.NewWithClaims(method, payload)
 	return t.SignedString([]byte(signKey))

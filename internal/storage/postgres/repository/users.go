@@ -196,3 +196,25 @@ func (r UserRepository) UpdateUserByID(ctx context.Context, userID string, user 
 
 	return r.GetUserByID(ctx, userID)
 }
+
+func (r UserRepository) GetUserByEmail(ctx context.Context, email string) (models.User, error) {
+	var err error
+
+	conn, err := r.pool.Acquire(ctx)
+	if err != nil {
+		return models.User{}, err
+	}
+
+	defer conn.Release()
+
+	var query string = "SELECT id, username, is_verified FROM users WHERE email = $1"
+	var id, username string
+	var isVerified bool
+
+	err = conn.QueryRow(ctx, query, email).Scan(&id, &username, &isVerified)
+	if err != nil {
+		return models.User{}, err
+	}
+
+	return models.NewUser(id, username, isVerified)
+}

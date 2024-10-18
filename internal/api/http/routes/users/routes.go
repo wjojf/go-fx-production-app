@@ -9,7 +9,7 @@ import (
 
 func AddRoutes(app *fiber.App, cfg config.Config, h handler.Handler) {
 	group := app.Group("/api/v1/users").
-		Use(middleware.CheckAuthentication(cfg, h.Repository()))
+		Use(middleware.CheckAuthentication(cfg, h.Logger(), h.Repository(), false))
 
 	group.Get("/", h.GetAll)
 	group.Get("/:id", h.GetByID)

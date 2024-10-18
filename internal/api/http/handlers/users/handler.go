@@ -24,3 +24,7 @@ func New(r repository.UsersRepository, log *slog.Logger, tracer opentracing.Trac
 func (h Handler) Repository() repository.UsersRepository {
 	return h.r
 }
+
+func (h Handler) Logger() *slog.Logger {
+	return h.log
+}

@@ -20,5 +20,7 @@ type Config struct {
 
 	JaegerUrl string `env:"JAEGER_URL"`
 
-	JwtSigningKey string `env:"JWT_SIGN_KEY,required"`
+	JwtSigningKey                string `env:"JWT_SIGN_KEY,required"`
+	JwtAccessTokenLifetimeHours  int    `env:"JWT_ACCESS_TOKEN_LIFETIME_HOURS" envDefault:"1"`
+	JwtRefreshTokenLifetimeHours int    `env:"JWT_REFRESH_TOKEN_LIFETIME_HOURS" envDefault:"24"`
 }

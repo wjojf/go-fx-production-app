@@ -4,19 +4,27 @@ import (
 	"fmt"
 	jwtLib "github.com/dgrijalva/jwt-go"
 	"github.com/gofiber/fiber/v3"
+	"github.com/pkg/errors"
 	types "github.com/wjojf/go-uber-fx/internal/api/http/types/auth"
 	"github.com/wjojf/go-uber-fx/internal/api/http/utils"
 	"github.com/wjojf/go-uber-fx/internal/domain/users/repository"
 	"github.com/wjojf/go-uber-fx/internal/pkg/config"
 	"github.com/wjojf/go-uber-fx/pkg/jwt"
-	"strings"
+	"log/slog"
 	"time"
 )
 
-func CheckAuthentication(cfg config.Config, r repository.UsersRepository) fiber.Handler {
+func CheckAuthentication(cfg config.Config, log *slog.Logger, r repository.UsersRepository, checkStorage bool) fiber.Handler {
 	return func(ctx fiber.Ctx) error {
 
-		token := strings.TrimLeft(ctx.Get("Authorization"), "Bearer ")
+		token, err := utils.ExtractAuthToken(ctx.Get("Authorization"))
+
+		if err != nil {
+			ctx.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+				"error": errors.Wrap(err, "invalid authorization format").Error(),
+			})
+		}
+
 		if token == "" {
 			return ctx.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
 				"message": "Unauthorized. No Authorization header",
@@ -39,11 +47,13 @@ func CheckAuthentication(cfg config.Config, r repository.UsersRepository) fiber.
 		}
 
 		// Check if user exists
-		_, err := r.GetUserByID(ctx.Context(), claims.UserId)
-		if err != nil {
-			return ctx.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
-				"message": "Unauthorized. User not found",
-			})
+		if checkStorage {
+			_, err := r.GetUserByID(ctx.Context(), claims.UserId)
+			if err != nil {
+				return ctx.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
+					"message": "Unauthorized. User not found",
+				})
+			}
 		}
 
 		ctx.Set(utils.UserIdContextKey, claims.UserId)

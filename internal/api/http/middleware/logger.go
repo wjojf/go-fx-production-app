@@ -14,7 +14,7 @@ func RequestLogger(logger *slog.Logger) fiber.Handler {
 		// Process the request
 		err := c.Next()
 
-		duration := time.Since(startTime)
+		duration := time.Since(startTime).Milliseconds()
 
 		// Log request information
 		logger.Info("Request Processed",
@@ -22,7 +22,7 @@ func RequestLogger(logger *slog.Logger) fiber.Handler {
 			slog.String("method", c.Method()),
 			slog.String("url", c.OriginalURL()),
 			slog.Int("status", c.Response().StatusCode()),
-			slog.Duration("latency", duration),
+			slog.Int64("latency_ms", duration),
 			slog.String("client_ip", c.IP()),
 		)
 
