@@ -57,3 +57,17 @@ func MarkOutboxEventAsProduced(pool *pgxpool.Pool, id int) error {
 
 	return err
 }
+
+func DeleteProducesOutboxEvents(pool *pgxpool.Pool) error {
+	conn, err := pool.Acquire(context.Background())
+	if err != nil {
+		return err
+	}
+
+	defer conn.Release()
+
+	var query string = `DELETE FROM outbox WHERE is_published=true;`
+	_, err = conn.Exec(context.Background(), query)
+
+	return err
+}

@@ -1,6 +1,7 @@
 package graphql
 
 import (
+	"github.com/wjojf/go-uber-fx/internal/api/graphql/adapters"
 	"github.com/wjojf/go-uber-fx/internal/api/graphql/resolvers"
 	"go.uber.org/fx"
 )
@@ -16,5 +17,11 @@ var Module = fx.Module(
 	// Server
 	fx.Provide(
 		NewServer,
+	),
+
+	// Fiber Adapter
+	fx.Provide(
+		adapters.Fiber,
+		adapters.FiberPlayground,
 	),
 )

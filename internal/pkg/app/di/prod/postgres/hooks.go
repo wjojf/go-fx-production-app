@@ -23,4 +23,15 @@ func PostgresJobs(lc fx.Lifecycle, log *slog.Logger, p storage.OutboxProducer, p
 			},
 		},
 	)
+
+	lc.Append(
+		fx.Hook{
+			OnStop: func(ctx context.Context) error {
+				log.Info("Stopping outbox producer")
+				p.Stop()
+				return nil
+			},
+		},
+	)
+
 }

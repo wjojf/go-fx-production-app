@@ -17,5 +17,5 @@ RUN go build -o ./.bin/app ./cmd/go-uber-fx/main.go
 
 # RUN ["make", "up"]
 
-EXPOSE 8080
+EXPOSE 8000
 CMD ["./.bin/app"]

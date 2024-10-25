@@ -1,6 +1,8 @@
 package prod
 
 import (
+	"github.com/wjojf/go-uber-fx/internal/api/graphql"
+	"github.com/wjojf/go-uber-fx/internal/pkg/app/di/prod/profiling"
 	"github.com/wjojf/go-uber-fx/internal/pkg/tracing"
 	"log/slog"
 
@@ -51,6 +53,9 @@ func Bundle(cfg config.Config) fx.Option {
 		// PubSub
 		pubsubFX.Module,
 
+		// GraphQL
+		graphql.Module,
+
 		// Main Activity
 		fx.Invoke(
 			// Start the fiber server
@@ -61,6 +66,9 @@ func Bundle(cfg config.Config) fx.Option {
 
 			// Start the outbox producer
 			postgresFX.PostgresJobs,
+
+			// Start Profiling
+			profiling.ProfilingHooks,
 		),
 	)
 }

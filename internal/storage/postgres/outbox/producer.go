@@ -20,8 +20,11 @@ type Producer struct {
 	pool    *pgxpool.Pool
 	started bool
 
-	publisher events.Publisher
-	ticker    *time.Ticker
+	publisher    events.Publisher
+	ticker       *time.Ticker
+	deleteTicker *time.Ticker
+
+	doneCh chan struct{}
 }
 
 func NewProducer(log *slog.Logger, pool *pgxpool.Pool, publisher events.Publisher) *Producer {
@@ -31,12 +34,28 @@ func NewProducer(log *slog.Logger, pool *pgxpool.Pool, publisher events.Publishe
 	}
 
 	return &Producer{
-		log:       log,
-		pool:      pool,
-		publisher: publisher,
-		started:   false,
-		ticker:    time.NewTicker(5 * time.Second),
+		log:          log,
+		pool:         pool,
+		publisher:    publisher,
+		started:      false,
+		ticker:       time.NewTicker(500 * time.Millisecond),
+		deleteTicker: time.NewTicker(5 * time.Second),
+		doneCh:       make(chan struct{}),
 	}
+}
+
+func (p *Producer) Stop() {
+	if !p.started {
+		return
+	}
+
+	p.started = false
+	p.ticker.Stop()
+	p.deleteTicker.Stop()
+
+	p.doneCh <- struct{}{}
+
+	close(p.doneCh)
 }
 
 func (p *Producer) StartProducing() error {
@@ -55,15 +74,30 @@ func (p *Producer) listen() error {
 	for {
 		select {
 		case <-p.ticker.C:
-			p.log.Info("checking for outbox events to produce")
+			//p.log.Info("checking for outbox events to produce")
 
 			count, err := p.produce()
 			if err != nil {
 				p.log.Error("failed to produce outbox events", slog.Any("err", err))
 				continue
 			}
+			if count != 0 {
+				p.log.Info("outbox events produced", slog.Int("count", count))
+			}
 
-			p.log.Info("outbox events produced", slog.Int("count", count))
+		case <-p.deleteTicker.C:
+			p.log.Info("checking for outbox events to delete")
+
+			err := DeleteProducesOutboxEvents(p.pool)
+			if err != nil {
+				p.log.Error("failed to delete produced outbox events", slog.Any("err", err))
+				continue
+			}
+
+			p.log.Info("produced outbox events deleted")
+		case <-p.doneCh:
+			p.log.Info("Received stop signal. outbox producer stopped")
+			break
 		}
 	}
 }
