@@ -23,15 +23,28 @@ func PubSubHooks(
 	log *slog.Logger,
 
 ) {
+
+	// map of event handlers: extend here
+	var eventHandlers = map[string][]pubsub.Handler{
+		events.TopicUserCreated: {
+			userVerifyHandler,
+		},
+	}
+
 	lc.Append(
 		fx.Hook{
 			OnStart: func(context.Context) error {
 
-				// Verify user handler
-				vh := pubsub.NewAdaptedHandler(userVerifyHandler)
-				err := subscriber.Subscribe(events.TopicUserCreated, vh)
-				if err != nil {
-					log.Error("Failed to subscribe to user verify handler", slog.Any("err", err))
+				// subscribe to the events
+				for topic, handlers := range eventHandlers {
+					for _, handler := range handlers {
+						err := subscriber.Subscribe(topic, pubsub.NewAdaptedHandler(handler))
+						if err != nil {
+							log.Error("Failed to subscribe",
+								slog.String("topic", topic), slog.Any("err", err),
+							)
+						}
+					}
 				}
 
 				return nil

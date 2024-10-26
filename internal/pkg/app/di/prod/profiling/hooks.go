@@ -20,6 +20,7 @@ func ProfilingHooks(lc fx.Lifecycle, log *slog.Logger) {
 			return nil
 		},
 		OnStop: func(context.Context) error {
+			log.Info("Stopping CPU profiling")
 			pprof.StopCPUProfile()
 			return nil
 		},
