@@ -52,10 +52,21 @@ func MarkOutboxEventAsProduced(pool *pgxpool.Pool, id int) error {
 
 	defer conn.Release()
 
-	var query string = `UPDATE outbox SET is_published=true WHERE id=$1;`
-	_, err = conn.Exec(context.Background(), query, id)
+	ctx := context.Background()
+	tx, err := conn.BeginTx(ctx, pgx.TxOptions{IsoLevel: pgx.Serializable})
+	if err != nil {
+		return err
+	}
 
-	return err
+	var query string = `UPDATE outbox SET is_published=true WHERE id=$1;`
+	_, err = tx.Exec(context.Background(), query, id)
+	if err != nil {
+		tx.Rollback(ctx)
+		return err
+	}
+
+	tx.Commit(ctx)
+	return nil
 }
 
 func DeleteProducesOutboxEvents(pool *pgxpool.Pool) error {

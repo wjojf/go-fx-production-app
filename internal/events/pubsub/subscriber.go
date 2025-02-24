@@ -61,7 +61,7 @@ func (s Subscriber) Subscribe(topicName string, handler Handler) error {
 		for {
 			var ctx context.Context = s.ctxFunc()
 
-			s.log.Info("Listening for messages...", slog.String("topic", topicName))
+			s.log.Debug("Listening for messages...", slog.String("topic", topicName))
 			err := sub.Receive(ctx, func(ctx context.Context, message *pubsub.Message) {
 				handler.Handle(ctx, message)
 				message.Ack()

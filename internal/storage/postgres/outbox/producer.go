@@ -86,7 +86,7 @@ func (p *Producer) listen() error {
 			}
 
 		case <-p.deleteTicker.C:
-			p.log.Info("checking for outbox events to delete")
+			p.log.Debug("checking for outbox events to delete")
 
 			err := DeleteProducesOutboxEvents(p.pool)
 			if err != nil {
@@ -94,7 +94,7 @@ func (p *Producer) listen() error {
 				continue
 			}
 
-			p.log.Info("produced outbox events deleted")
+			p.log.Debug("produced outbox events deleted")
 		case <-p.doneCh:
 			p.log.Info("Received stop signal. outbox producer stopped")
 			break

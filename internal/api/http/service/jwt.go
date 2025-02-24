@@ -1,10 +1,11 @@
 package service
 
 import (
+	"time"
+
 	types "github.com/wjojf/go-uber-fx/internal/api/http/types/auth"
 	"github.com/wjojf/go-uber-fx/internal/pkg/config"
 	"github.com/wjojf/go-uber-fx/pkg/jwt"
-	"time"
 )
 
 type JwtService struct {
@@ -51,4 +52,15 @@ func (s JwtService) GenerateTokens(userId string) (types.TokenPair, error) {
 func (s JwtService) generateToken(userId string, lifetime time.Duration) (string, error) {
 	claims := types.NewPayload(userId, lifetime)
 	return jwt.GenerateToken(jwt.Hs256, claims, s.cfg.JwtSigningKey)
+}
+
+
+func (s JwtService) ExtractUserID(token string) (string, error) {
+	claims := types.JwtPayload{}
+	err := jwt.DecodeToken(token, jwt.Hs256, s.cfg.JwtSigningKey, &claims)
+	if err != nil {
+		return "", err
+	}
+
+	return claims.UserId, nil
 }
