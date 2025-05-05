@@ -15,3 +15,12 @@ func New() (*fx.App, error) {
 
 	return fx.New(di.GetAppBundle(*cfg)), nil
 }
+
+func NewConsumer() (*fx.App, error) {
+	cfg, err := config.FromEnv()
+	if err != nil {
+		return nil, err
+	}
+
+	return fx.New(di.GetConsumerBundle(*cfg)), nil
+}

@@ -8,7 +8,6 @@ import (
 	pubsubFX "github.com/wjojf/go-uber-fx/internal/pkg/app/di/local/pubsub"
 	"github.com/wjojf/go-uber-fx/internal/pkg/config"
 	"github.com/wjojf/go-uber-fx/internal/pkg/logging"
-	"github.com/wjojf/go-uber-fx/internal/pkg/tracing"
 	"github.com/wjojf/go-uber-fx/internal/storage/postgres"
 	"go.uber.org/fx"
 )
@@ -27,9 +26,6 @@ func Bundle(cfg config.Config) fx.Option {
 
 		// Infrastructure
 		logging.Module,
-
-		// Tracing
-		tracing.Module,
 
 		// Postgres Connection
 		postgres.Module,

@@ -1,10 +1,9 @@
 package prod
 
 import (
-	"github.com/wjojf/go-uber-fx/internal/api/graphql"
-	"github.com/wjojf/go-uber-fx/internal/pkg/app/di/prod/profiling"
-	"github.com/wjojf/go-uber-fx/internal/pkg/tracing"
 	"log/slog"
+
+	"github.com/wjojf/go-uber-fx/internal/api/graphql"
 
 	"github.com/wjojf/go-uber-fx/internal/pkg/app/di/prod/domain"
 	fiberFX "github.com/wjojf/go-uber-fx/internal/pkg/app/di/prod/fiber"
@@ -17,7 +16,7 @@ import (
 	"go.uber.org/fx/fxevent"
 )
 
-func Bundle(cfg config.Config) fx.Option {
+func AppBundle(cfg config.Config) fx.Option {
 
 	return fx.Options(
 		// Config
@@ -41,9 +40,6 @@ func Bundle(cfg config.Config) fx.Option {
 		// Infrastructure
 		logging.Module,
 
-		// Tracing
-		tracing.Module,
-
 		// Postgres Connection
 		postgres.Module,
 
@@ -61,14 +57,45 @@ func Bundle(cfg config.Config) fx.Option {
 			// Start the fiber server
 			fiberFX.ServerHooks,
 
-			// Start event handlers and listeners
-			pubsubFX.PubSubHooks,
-
 			// Start the outbox producer
 			postgresFX.PostgresJobs,
+		),
+	)
+}
 
-			// Start Profiling
-			profiling.ProfilingHooks,
+func ConsumerBundle(cfg config.Config) fx.Option {
+	return fx.Options(
+		// Config
+		fx.Supply(cfg),
+
+		// FX Event Loggers
+		fx.WithLogger(
+			func(log *slog.Logger) fxevent.Logger {
+				return &fxevent.SlogLogger{
+					Logger: log,
+				}
+			},
+		),
+
+		// Domain
+		domain.Module,
+
+		// Repository
+		postgresFX.Repositories,
+
+		// Infrastructure
+		logging.Module,
+
+		// Postgres Connection
+		postgres.Module,
+
+		// PubSub
+		pubsubFX.Module,
+
+		// Main Activity
+		fx.Invoke(
+			// Start event handlers and listeners
+			pubsubFX.PubSubHooks,
 		),
 	)
 }

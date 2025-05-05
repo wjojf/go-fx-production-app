@@ -15,8 +15,12 @@ func GetAppBundle(cfg config.Config) fx.Option {
 	case config.EnvDev:
 		return dev.Bundle(cfg)
 	case config.EnvProd:
-		return prod.Bundle(cfg)
+		return prod.AppBundle(cfg)
 	default:
-		return prod.Bundle(cfg)
+		return prod.AppBundle(cfg)
 	}
+}
+
+func GetConsumerBundle(cfg config.Config) fx.Option {
+	return prod.ConsumerBundle(cfg)
 }
